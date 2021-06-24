@@ -1,6 +1,7 @@
 package com.example.appv1;
 
 import android.os.Bundle;
+import android.widget.TextView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -11,6 +12,14 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.appv1.databinding.ActivityMainBinding;
+import com.uwetrottmann.trakt5.TraktV2;
+import com.uwetrottmann.trakt5.entities.TrendingShow;
+import com.uwetrottmann.trakt5.enums.Extended;
+import com.uwetrottmann.trakt5.services.Shows;
+
+import java.util.List;
+
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,6 +41,37 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
+
+        //mycode
+        TextView tv = (TextView)findViewById(R.id.text_home);
+        //tv.setText("Welcome to Tutlane");
+        List<TrendingShow> shows = trend();
+        tv.setText(shows.get(0).show.title);
+    }
+
+    private List<TrendingShow> trend(){
+        TraktV2 trakt = new TraktV2("api_key");
+        Shows traktShows = trakt.shows();
+        List<TrendingShow> shows = null;
+        try {
+            // Get trending shows
+            Response<List<TrendingShow>> response = traktShows.trending(1, null, Extended.FULL).execute();
+            if (response.isSuccessful()) {
+                shows = response.body();
+                for (TrendingShow trending : shows) {
+                    System.out.println("Title: " + trending.show.title);
+                }
+            } else {
+                if (response.code() == 401) {
+                    // authorization required, supply a valid OAuth access token
+                } else {
+                    // the request failed for some other reason
+                }
+            }
+        } catch (Exception e) {
+            // see execute() javadoc
+        }
+        return shows;
     }
 
 }
