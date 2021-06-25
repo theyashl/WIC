@@ -1,6 +1,8 @@
 package com.example.appv1;
 
 import android.os.Bundle;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -45,14 +47,21 @@ public class MainActivity extends AppCompatActivity {
         //mycode
         TextView tv = (TextView)findViewById(R.id.text_home);
         //tv.setText("Welcome to Tutlane");
-        List<TrendingShow> shows = trend();
-        tv.setText(shows.get(0).show.title);
+        /*List<TrendingShow> shows = trend();
+        tv.setText(shows.get(0).show.title);*/
+
+        ArrayAdapter adapter = new ArrayAdapter<String>(this,
+                R.layout.activity_listview, trend());
+
+        ListView listView = (ListView) findViewById(R.id.list);
+        listView.setAdapter(adapter);
     }
 
-    private List<TrendingShow> trend(){
+    private List<String> trend(){
         TraktV2 trakt = new TraktV2("api_key");
         Shows traktShows = trakt.shows();
         List<TrendingShow> shows = null;
+        List<String> ret = null;
         try {
             // Get trending shows
             Response<List<TrendingShow>> response = traktShows.trending(1, null, Extended.FULL).execute();
@@ -71,7 +80,9 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             // see execute() javadoc
         }
-        return shows;
+        for (int i=0; i<shows.size(); ++i) ret.set(i, shows.get(i).show.title);
+        //return shows;
+        return ret;
     }
 
 }
